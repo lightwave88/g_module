@@ -7,6 +7,15 @@ const dirname = __dirname;
 const $g_moudle = {
   load(name, path) {
     debugger;
+
+    if (typeof name == 'object') {
+      let list = name;
+      Object.keys(name).forEach(name => {
+        this.load(name, list[name]);
+      });
+      return;
+    }
+    //------------------
     let _path = path;
 
     if (!$path.isAbsolute(_path)) {
@@ -27,12 +36,6 @@ const $g_moudle = {
   //--------------------------------------
   has(name) {
     return $modules.has(name);
-  },
-  //--------------------------------------
-  importList(list) {
-    Object.keys(list).forEach(name => {
-      this.load(name, list[name]);
-    });
   },
   //--------------------------------------
   get path() {
