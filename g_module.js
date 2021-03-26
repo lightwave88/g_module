@@ -1,11 +1,17 @@
 const $path = require('path');
 
-const $modules = new Map();;
+const $modules = new Map();
+
+const dirname = __dirname;
 
 const $g_moudle = {
   load(name, path) {
     debugger;
-    let _path = $path.resolve(__dirname, path);
+    let _path = path;
+
+    if (!$path.isAbsolute(_path)) {
+      _path = $path.resolve(dirname, path);
+    }
 
     let m = require(_path);
 
@@ -29,21 +35,10 @@ const $g_moudle = {
     });
   },
   //--------------------------------------
-  
+  get path() {
+    return dirname;
+  }
 };
 
 module.exports = $g_moudle;
-
-const importList = {
-  mime: './mime/index.js',
-  // ejs: './ejs/index.js',
-  config: './config.js',
-  tools: './tools.js',
-  Response: './response.js',
-  Server: './server.js',
-};
-
-debugger;
-$g_moudle.importList(importList);
-
 
