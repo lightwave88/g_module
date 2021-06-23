@@ -1,47 +1,74 @@
-const $path = require('path');
+'use strict';
 
-const $modules = new Map();
+let $parent = null;
 
-const dirname = __dirname;
-
+// for ES6
 const $g_moudle = {
-  load(name, path) {
-    debugger;
 
-    if (typeof name == 'object') {
-      let list = name;
-      Object.keys(name).forEach(name => {
-        this.load(name, list[name]);
+  modules: new Map(),
+  //--------------------------------------
+  // 可以有階層性
+  get parent() {
+    return $parent;
+  },
+  set parent(value) { },
+  //--------------------------------------
+  // API
+  import(name, module = null) {
+    // debugger;
+
+    if (module == null && typeof (name) == 'string') {
+      let modules = name;
+      Object.keys(modules).forEach((moduleName) => {
+        // debugger;
+        const m = modules[moduleName];
+        this.import(moduleName, m);
       });
       return;
     }
     //------------------
-    let _path = path;
+    // debugger;
+    this.modules.set(name, module);
+  },
+  //--------------------------------------
+  // API
+  get(name, justSelf = false) {
 
-    if (!$path.isAbsolute(_path)) {
-      _path = $path.resolve(dirname, path);
+    let res = null;
+
+    let g = this;
+    while (g != null) {
+      if (g.modules.has(name, justSelf)) {
+        res = g.modules.get(name);
+        break;
+      }
+      if (justSelf) {
+        break;
+      }
+      g = g.parent;
     }
+    return res;
+  },
+  //--------------------------------------
+  // API
+  has(name, justSelf = false) {
+    let g = this;
 
-    let m = require(_path);
-
-    if (typeof m == 'function' && m.inject === true) {
-      m = m(this);
+    while (g != null) {
+      if (g.modules.has(name)) {
+        return true;
+      }
+      if (justSelf) {
+        return false;
+      }
+      g = g.parent;
     }
-    $modules.set(name, m);
+    return false;
   },
   //--------------------------------------
-  get(name) {
-    return ($modules.has(name) ? $modules.get(name) : null);
-  },
-  //--------------------------------------
-  has(name) {
-    return $modules.has(name);
-  },
-  //--------------------------------------
-  get path() {
-    return dirname;
+  setParent(p) {
+    $parent = p;
   }
 };
 
-module.exports = $g_moudle;
-
+export default $g_moudle;
